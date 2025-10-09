@@ -1,0 +1,12 @@
+numpy
+pandas
+matplotlib
+scikit-learn
+requests
+pytest
+pymysql
+dotenv
+scipy
+seaborn
+streamlit
+bcrypt

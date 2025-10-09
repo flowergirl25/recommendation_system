@@ -1,0 +1,16 @@
+# Editor/IDE
+.vscode/
+.idea/
+
+# Log and temp files
+*.log
+*.tmp
+temp/
+
+# Python
+venv/
+*.pyc
+
+# Secrets
+.env
+
