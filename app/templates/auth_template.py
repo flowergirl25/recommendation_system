@@ -57,7 +57,7 @@ def login_view():
 
 
             else:
-                st.error(f"❌ {res['error']}")
+                st.error(f" {res['error']}")
 
 
 
