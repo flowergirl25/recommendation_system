@@ -25,12 +25,12 @@ def _ensure_role_in_session():
 
 def _sidebar_session_panel():
     """Small sidebar area to show current user and logout button."""
-    st.sidebar.title("🔧 Controls")
+    st.sidebar.title(" Controls")
     if "user_email" in st.session_state:
         st.sidebar.markdown(f"**User:** `{st.session_state['user_email']}`")
         st.sidebar.markdown(f"**Role:** `{st.session_state.get('user_role', 'user')}`")
         st.sidebar.markdown("---")
-        if st.sidebar.button("🔒 Logout"):
+        if st.sidebar.button(" Logout"):
             try:
                 AuthService.logout(st.session_state["user_email"])
             except Exception:
@@ -44,7 +44,7 @@ def _sidebar_session_panel():
 
 
 def main():
-    st.set_page_config(page_title="🎬 Movie Recommendation System", layout="wide")
+    st.set_page_config(page_title=" Movie Recommendation System", layout="wide")
     _ensure_role_in_session()
     _sidebar_session_panel()
 
