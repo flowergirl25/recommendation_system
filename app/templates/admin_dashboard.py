@@ -14,7 +14,7 @@ from app.models.ratings_data import Rating
 def validate_admin_session():
     """Ensure current session belongs to an admin."""
     if "user_email" not in st.session_state or st.session_state.get("user_role") != "admin":
-        st.warning("⚠️ Admin access only. Please login as admin.")
+        st.warning("Admin access only. Please login as admin.")
         st.stop()
     return st.session_state["user_email"]
 
@@ -22,7 +22,7 @@ def validate_admin_session():
 #overview section
 def overview_section():
     """System overview metrics."""
-    st.title("📊 System Overview")
+    st.title("System Overview")
 
     users = User.fetch_all(active_only=False)
     movies = MovieService.list_movies(limit=1000)
@@ -36,11 +36,11 @@ def overview_section():
     total_watchlist = len(watchlists.get("data", [])) if watchlists["success"] else 0
 
     c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("👥 Users", total_users)
-    c2.metric("🟢 Active Users", active_users)
-    c3.metric("🎬 Movies", total_movies)
-    c4.metric("⭐ Ratings", total_ratings)
-    c5.metric("📺 Watchlist Entries", total_watchlist)
+    c1.metric("Users", total_users)
+    c2.metric("Active Users", active_users)
+    c3.metric("Movies", total_movies)
+    c4.metric("Ratings", total_ratings)
+    c5.metric("Watchlist Entries", total_watchlist)
 
     st.info(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
@@ -48,7 +48,7 @@ def overview_section():
 #user management section
 def user_management_section():
     """Manage users — activate/deactivate/change role."""
-    st.subheader("👥 User Management")
+    st.subheader("User Management")
 
     users = User.fetch_all(active_only=False)
     st.dataframe(users)
@@ -60,21 +60,21 @@ def user_management_section():
         new_role = st.selectbox("New Role", ["user", "admin"])
         if st.button("Update Role"):
             User.update_role(email, new_role)
-            st.success(f"✅ Role updated for {email} → {new_role}")
+            st.success(f"Role updated for {email} → {new_role}")
     elif action == "Deactivate":
         if st.button("Deactivate User"):
             User.deactivate(email)
-            st.warning(f"🚫 User {email} deactivated")
+            st.warning(f"User {email} deactivated")
     elif action == "Activate":
         if st.button("Activate User"):
             User.activate(email)
-            st.success(f"🟢 User {email} activated")
+            st.success(f"User {email} activated")
 
 
 # --------------------------- Movie Management ---------------------------
 def movie_management_section():
     """Add, update, or manage movies."""
-    st.subheader("🎬 Movie Management")
+    st.subheader("Movie Management")
 
     action = st.selectbox("Choose action", ["Add", "Update", "Deactivate", "Activate"])
 
@@ -122,7 +122,7 @@ def movie_management_section():
 # --------------------------- Watchlist Manager ---------------------------
 def watchlist_manager_section():
     """View all user watchlists."""
-    st.subheader("📺 Watchlist Manager (All Users)")
+    st.subheader("Watchlist Manager (All Users)")
 
     res = WatchlistService.get_all_watchlists()
     if res["success"] and res["data"]:
@@ -130,17 +130,17 @@ def watchlist_manager_section():
         st.dataframe(res["data"])
 
         #email filter
-        filter_email = st.text_input("🔍 Filter by User Email (optional)")
+        filter_email = st.text_input("Filter by User Email (optional)")
         if filter_email:
             filtered = [w for w in res["data"] if filter_email.lower() in w["user_email"].lower()]
             st.dataframe(filtered)
 
         #csv export
-        if st.button("📤 Export All to CSV"):
+        if st.button("Export All to CSV"):
             import pandas as pd
             df = pd.DataFrame(res["data"])
             df.to_csv("all_watchlists.csv", index=False)
-            st.success("✅ Exported to all_watchlists.csv")
+            st.success("Exported to all_watchlists.csv")
     else:
         st.warning("No watchlist entries found.")
 
@@ -148,12 +148,12 @@ def watchlist_manager_section():
 #analytics section
 def analytics_section():
     """System analytics — top movies, users, and ratings."""
-    st.subheader("📈 Analytics Dashboard")
+    st.subheader("Analytics Dashboard")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 🎥 Top Rated Movies")
+        st.markdown("### Top Rated Movies")
         top_movies = RecommendationService.get_top_rated_movies(k=10)
         if top_movies["success"]:
             titles = [m["title"] for m in top_movies["data"]]
@@ -164,7 +164,7 @@ def analytics_section():
             st.warning("Unable to fetch top-rated movies.")
 
     with col2:
-        st.markdown("### 👥 Most Active Users")
+        st.markdown("### Most Active Users")
         active_users = RecommendationService.get_most_active_users(k=10)
         if active_users["success"]:
             emails = [u["email"] for u in active_users["data"]]
@@ -175,7 +175,7 @@ def analytics_section():
             st.warning("Unable to fetch user activity data.")
 
     st.markdown("---")
-    st.markdown("### ⭐ Rating Distribution")
+    st.markdown("### Rating Distribution")
     rating_dist = RecommendationService.get_rating_distribution()
     if rating_dist["success"]:
         x = [r["rating"] for r in rating_dist["data"]]
@@ -192,10 +192,10 @@ def analytics_section():
 # --------------------------- Logout ---------------------------
 def logout_section():
     """Logout for admin."""
-    if st.button("🔒 Logout"):
+    if st.button("Logout"):
         AuthService.logout(st.session_state["user_email"])
         st.session_state.clear()
-        st.success("✅ Logged out successfully.")
+        st.success("Logged out successfully.")
         st.stop()
 
 
@@ -207,24 +207,24 @@ def admin_dashboard():
     menu = st.sidebar.radio(
         "Admin Navigation",
         [
-            "📊 Overview",
-            "👥 User Management",
-            "🎬 Movie Management",
-            "📺 Watchlist Manager",
-            "📈 Analytics",
-            "🔒 Logout",
+            "Overview",
+            "User Management",
+            "Movie Management",
+            "Watchlist Manager",
+            "Analytics",
+            "Logout",
         ],
     )
 
-    if menu == "📊 Overview":
+    if menu == "Overview":
         overview_section()
-    elif menu == "👥 User Management":
+    elif menu == "User Management":
         user_management_section()
-    elif menu == "🎬 Movie Management":
+    elif menu == "Movie Management":
         movie_management_section()
-    elif menu == "📺 Watchlist Manager":
+    elif menu == "Watchlist Manager":
         watchlist_manager_section()
-    elif menu == "📈 Analytics":
+    elif menu == "Analytics":
         analytics_section()
-    elif menu == "🔒 Logout":
+    elif menu == "Logout":
         logout_section()

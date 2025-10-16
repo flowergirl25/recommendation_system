@@ -85,7 +85,7 @@ def evaluate_content_from_features(user_id, k=10):
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     recommended_idxs = [i for i, _ in sim_scores if i != target_idx][:k]
 
-    # ✅ Safe mapping
+    # Safe mapping
     recommended = [reverse_index[i] for i in recommended_idxs if i in reverse_index]
 
     relevant = user_movies
@@ -108,7 +108,7 @@ def evaluate_content_from_cosine(user_id, k=10):
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     recommended_idxs = [i for i, _ in sim_scores if i != target_idx][:k]
 
-    # ✅ Safe mapping
+    # Safe mapping
     recommended = [reverse_index[i] for i in recommended_idxs if i in reverse_index]
 
     relevant = user_movies
@@ -172,15 +172,15 @@ def run_evaluation(n_users=50, k=10):
         all_true.extend(true_ratings)
         all_pred.extend(pred_ratings)
 
-    print("📊 Content-Based (Feature Similarity)")
+    print(" Content-Based (Feature Similarity)")
     print(f"Precision@{k}: {np.mean(feat_precisions):.4f}")
     print(f"Recall@{k}: {np.mean(feat_recalls):.4f}")
 
-    print("\n📊 Content-Based (Cosine Sim Precomputed)")
+    print("\n Content-Based (Cosine Sim Precomputed)")
     print(f"Precision@{k}: {np.mean(cos_precisions):.4f}")
     print(f"Recall@{k}: {np.mean(cos_recalls):.4f}")
 
-    print("\n📊 Collaborative Filtering")
+    print("\n Collaborative Filtering")
     print(f"Precision@{k}: {np.mean(collab_precisions):.4f}")
     print(f"Recall@{k}: {np.mean(collab_recalls):.4f}")
     print(f"RMSE: {rmse(all_true, all_pred):.4f}")

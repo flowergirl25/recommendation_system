@@ -15,16 +15,16 @@ from sklearn.model_selection import train_test_split
 
 
 # -------------------- STEP 1: Load Data --------------------
-print("📥 Loading data and similarity matrix...")
+print(" Loading data and similarity matrix...")
 
 # Load ratings data
 ratings = pd.read_csv(r"D:\movie_recommendation_system\recommend_model\data\processed\ratings_final_fixed.csv")   # columns: userId, movieId, rating
-print(f"✅ Ratings loaded: {len(ratings)} rows")
+print(f" Ratings loaded: {len(ratings)} rows")
 
 # Load similarity matrix
 with open(r"D:\movie_recommendation_system\recommend_model\trained_models\item_similarity.pkl", "rb") as f:
     item_similarity = pickle.load(f)
-print(f"✅ Similarity matrix loaded with shape: {item_similarity.shape}")
+print(f" Similarity matrix loaded with shape: {item_similarity.shape}")
 
 
 # -------------------- STEP 2: Predict Rating --------------------
@@ -60,13 +60,13 @@ def predict_rating(user_id, movie_id, ratings_df, similarity_matrix, k=10):
 
 
 # -------------------- STEP 3: Split Train/Test --------------------
-print("🔀 Splitting data into train and test sets...")
+print(" Splitting data into train and test sets...")
 train_df, test_df = train_test_split(ratings, test_size=0.2, random_state=42)
 print(f"Train: {len(train_df)} | Test: {len(test_df)}")
 
 
 # -------------------- STEP 4: Compute RMSE and MAE --------------------
-print("📊 Calculating RMSE and MAE...")
+print(" Calculating RMSE and MAE...")
 
 predictions, actuals = [], []
 
@@ -80,7 +80,7 @@ for _, row in test_df.iterrows():
 rmse = sqrt(mean_squared_error(actuals, predictions))
 mae = mean_absolute_error(actuals, predictions)
 
-print("\n📈 Model Evaluation Results:")
+print("\n Model Evaluation Results:")
 print(f"   RMSE: {rmse:.4f}")
 print(f"   MAE : {mae:.4f}")
 
@@ -125,16 +125,16 @@ def precision_recall_at_k(test_df, train_df, similarity_matrix, k=10):
     return np.mean(precisions), np.mean(recalls)
 
 
-print("\n📊 Calculating Precision@K and Recall@K...")
+print("\n Calculating Precision@K and Recall@K...")
 precision, recall = precision_recall_at_k(test_df, train_df, item_similarity, k=10)
 
-print("\n🎯 Ranking Evaluation:")
+print("\nRanking Evaluation:")
 print(f"   Precision@10: {precision:.4f}")
 print(f"   Recall@10   : {recall:.4f}")
 
 
 # -------------------- STEP 6: Summary --------------------
-print("\n✅ Model Evaluation Complete!")
+print("\nModel Evaluation Complete!")
 print("-" * 40)
 print(f"RMSE           : {rmse:.4f}")
 print(f"MAE            : {mae:.4f}")

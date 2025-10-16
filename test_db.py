@@ -9,24 +9,24 @@ def test_connection():
     conn = connecting_db()
     
     if conn:
-        print("✓ Connection successful!")
+        print(" Connection successful!")
         
         # Try a simple query
         try:
             cursor = conn.cursor()
             cursor.execute("SELECT 1 as test")
             result = cursor.fetchone()
-            print(f"✓ Query test passed: {result}")
+            print(f" Query test passed: {result}")
             cursor.close()
         except Exception as e:
-            print(f"✗ Query failed: {e}")
+            print(f" Query failed: {e}")
         
         # Close connection
         conn.close()
-        print("✓ Connection closed")
+        print(" Connection closed")
         
     else:
-        print("✗ Connection failed!")
+        print(" Connection failed!")
 
 # Run the test
 if __name__ == "__main__":

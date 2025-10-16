@@ -17,4 +17,3 @@ def authenticate_user(email: str, password: str):
     if verify_password(password, user["password"]):
         return user
     return None
-
