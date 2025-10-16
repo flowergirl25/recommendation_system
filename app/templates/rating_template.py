@@ -4,7 +4,7 @@ from app.view.rating_view import RatingService   # fixed import (services, not s
 
 #add or update rating view
 def add_or_update_rating_view():
-    st.subheader("⭐ Rate a Movie")
+    st.subheader(" Rate a Movie")
 
     movieId = st.number_input("Enter Movie ID", min_value=1, step=1)
     watched = st.radio("Have you watched this movie?", ["Yes", "No"], index=1)
@@ -14,7 +14,7 @@ def add_or_update_rating_view():
         if st.button("Submit Rating"):
             user_email = st.session_state.get("user_email")
             if not user_email:
-                st.error("❌ You must be logged in to rate movies.")
+                st.error(" You must be logged in to rate movies.")
             else:
                 res = RatingService.add_or_update_rating(user_email, movieId, rating)
                 if res["success"]:
@@ -22,18 +22,18 @@ def add_or_update_rating_view():
                 else:
                     st.error(res["error"])
     else:
-        st.info("ℹ️ You can only rate movies after watching them.")
+        st.info("ℹ You can only rate movies after watching them.")
 
 
 #delete rating view
 def delete_rating_view():
-    st.subheader("🗑️ Delete Your Rating")
+    st.subheader(" Delete Your Rating")
     movieId = st.number_input("Enter Movie ID to delete rating", min_value=1, step=1)
 
     if st.button("Delete Rating"):
         user_email = st.session_state.get("user_email")
         if not user_email:
-            st.error("❌ You must be logged in.")
+            st.error(" You must be logged in.")
         else:
             res = RatingService.delete_rating(user_email, movieId)
             if res["success"]:
@@ -47,20 +47,20 @@ def user_ratings_view():
     st.subheader("🎥 My Ratings")
     user_email = st.session_state.get("user_email")
     if not user_email:
-        st.error("❌ You must be logged in.")
+        st.error(" You must be logged in.")
         return
 
     res = RatingService.get_user_ratings(user_email)
     if res["success"] and res["data"]:
         for r in res["data"]:
-            st.write(f"🎬 Movie ID: {r['movieId']} | ⭐ {r['rating']} | ⏰ {r['timestamp']}")
+            st.write(f" Movie ID: {r['movieId']} | ⭐ {r['rating']} | ⏰ {r['timestamp']}")
     else:
         st.info("You have not rated any movies yet.")
 
 
 #admin ratings view
 def admin_ratings_view():
-    st.subheader("🛠️ Admin: Manage Ratings")
+    st.subheader(" Admin: Manage Ratings")
 
     action = st.selectbox("Choose action", ["View All Ratings", "Delete Rating by ID"])
 
