@@ -333,7 +333,7 @@ st.markdown("""
 def validate_session():
     """Ensure user is logged in before accessing dashboard."""
     if "user_email" not in st.session_state:
-        st.warning("⚠️ Please login to access your dashboard.")
+        st.warning(" Please login to access your dashboard.")
         st.stop()
     return st.session_state["user_email"]
 
@@ -350,7 +350,7 @@ def star_rating_component(label, current_value=0, max_stars=5, movie_id=None, us
             new_rating = i + 1
             res_rate = RatingService.add_or_update_rating(user_email, movie_id, new_rating)
             if res_rate["success"]:
-                st.success("✅ Rating saved!")
+                st.success(" Rating saved!")
                 st.rerun()
             else:
                 st.error(res_rate["error"])
@@ -373,7 +373,7 @@ def movie_card(movie, user_email, section_prefix=""):
             if movie.get("poster_path"):
                 st.image(movie.get("poster_path"), width=150)
             else:
-                st.markdown("🎬")
+                st.markdown("")
         
         with col2:
             st.markdown(f"### {movie['title']}")
@@ -391,11 +391,11 @@ def movie_card(movie, user_email, section_prefix=""):
                         year = release_date.year
                     else:
                         year = str(release_date)[:4]
-                    st.markdown(f"📅 **{year}**")
+                    st.markdown(f" **{year}**")
             with rating_col3:
                 if movie.get('genres'):
                     genres_short = movie.get('genres')[:30] + "..." if len(movie.get('genres', '')) > 30 else movie.get('genres')
-                    st.markdown(f"🎭 *{genres_short}*")
+                    st.markdown(f" *{genres_short}*")
             
             # Overview
             if movie.get('overview'):
@@ -421,10 +421,10 @@ def movie_card(movie, user_email, section_prefix=""):
             
             with btn_col2:
                 # Watchlist button
-                if st.button(f"➕ Add to Watchlist", key=f"add_{section_prefix}_{movie['movieId']}_{user_email}"):
+                if st.button(f" Add to Watchlist", key=f"add_{section_prefix}_{movie['movieId']}_{user_email}"):
                     res = WatchlistService.add_to_watchlist(user_email, movie["movieId"], status="not_watched")
                     if res["success"]:
-                        st.success("✅ Added to Watchlist!")
+                        st.success(" Added to Watchlist!")
                     else:
                         st.error(res["error"])
         
@@ -435,7 +435,7 @@ def movie_card(movie, user_email, section_prefix=""):
 #dashboard main view
 def header_and_stats(user_email):
     """Welcome header with stats."""
-    st.markdown("<h1 style='text-align: center; margin-bottom: 2rem;'>🎬 Your Netflix Experience</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; margin-bottom: 2rem;'> Your Netflix Experience</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center; font-size: 1.2rem; color: #B3B3B3;'>Welcome back, <span style='color: #E50914; font-weight: 700;'>{user_email.split('@')[0]}</span></p>", unsafe_allow_html=True)
 
     ratings = RatingService.get_user_ratings(user_email)
@@ -447,23 +447,23 @@ def header_and_stats(user_email):
         st.metric("⭐ Ratings Given", len(ratings.get("data", [])))
     
     with col2:
-        st.metric("🎥 Watchlist", len(watchlist.get("data", [])))
+        st.metric(" Watchlist", len(watchlist.get("data", [])))
     
     with col3:
         if ratings.get("data"):
             avg_rating = sum(r["rating"] for r in ratings["data"]) / len(ratings["data"])
-            st.metric("📊 Avg Rating", f"{avg_rating:.1f}/5")
+            st.metric(" Avg Rating", f"{avg_rating:.1f}/5")
         else:
-            st.metric("📊 Avg Rating", "0/5")
+            st.metric(" Avg Rating", "0/5")
     
     with col4:
         watched_count = len([w for w in watchlist.get("data", []) if w.get("status") == "watched"])
-        st.metric("✅ Watched", watched_count)
+        st.metric(" Watched", watched_count)
 
 
 def trending_section(user_email):
     """ Trending Now section."""
-    st.markdown("<h2>🔥 Trending Now</h2>", unsafe_allow_html=True)
+    st.markdown("<h2> Trending Now</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Hot picks everyone's watching</p>", unsafe_allow_html=True)
     
     res = RecommendationService.get_trending_movies(k=6)
@@ -471,12 +471,12 @@ def trending_section(user_email):
         for movie in res["data"]:
             movie_card(movie, user_email, "trend")
     else:
-        st.warning("⚠️ Could not load trending movies.")
+        st.warning(" Could not load trending movies.")
 
 
 def personalized_recs_section(user_email):
     """ Personalized recommendations."""
-    st.markdown("<h2>🎯 Recommended For You</h2>", unsafe_allow_html=True)
+    st.markdown("<h2> Recommended For You</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Based on your viewing history and ratings</p>", unsafe_allow_html=True)
     
     if "rec_limit" not in st.session_state:
@@ -490,25 +490,25 @@ def personalized_recs_section(user_email):
         for movie in res["data"]:
             movie_card(movie, user_email, "rec")
     else:
-        st.info("💡 Rate a few movies to get personalized recommendations!")
+        st.info(" Rate a few movies to get personalized recommendations!")
 
 
 def because_you_watched(user_email):
     """ Because You Watched - Similar movies based on top-rated movie."""
-    st.markdown("<h2>🎞️ Because You Watched...</h2>", unsafe_allow_html=True)
+    st.markdown("<h2> Because You Watched...</h2>", unsafe_allow_html=True)
     
     # Get user's ratings
     top_movies = RatingService.get_user_ratings(user_email)
     
     if not top_movies["success"] or not top_movies["data"]:
-        st.info("💡 Rate some movies to see personalized recommendations based on your favorites!")
+        st.info(" Rate some movies to see personalized recommendations based on your favorites!")
         return
     
     # Get highest rated movie
     sorted_ratings = sorted(top_movies["data"], key=lambda x: x["rating"], reverse=True)
     
     if not sorted_ratings:
-        st.info("💡 Start rating movies to get recommendations!")
+        st.info(" Start rating movies to get recommendations!")
         return
     
     top_movie = sorted_ratings[0]
@@ -534,7 +534,7 @@ def because_you_watched(user_email):
 
 def genre_explorer(user_email):
     """Explore by Genre."""
-    st.markdown("<h2>🎭 Explore by Genre</h2>", unsafe_allow_html=True)
+    st.markdown("<h2> Explore by Genre</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Browse movies by your favorite genres</p>", unsafe_allow_html=True)
     
     genres = ["Action", "Comedy", "Drama", "Romance", "Thriller", "Sci-Fi", "Animation", "Horror", "Fantasy"]
@@ -543,7 +543,7 @@ def genre_explorer(user_email):
     with col1:
         selected = st.selectbox("Select a Genre", genres, key="genre_select")
     with col2:
-        search_btn = st.button("🔍 Show Movies", key="genre_button", use_container_width=True)
+        search_btn = st.button(" Show Movies", key="genre_button", use_container_width=True)
     
     if search_btn:
         st.session_state.current_genre = selected
@@ -562,7 +562,7 @@ def genre_explorer(user_email):
 
 def search_movies_section(user_email):
     """Search Movies - Persistent results."""
-    st.markdown("<h2>🔍 Search Movies</h2>", unsafe_allow_html=True)
+    st.markdown("<h2> Search Movies</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Find your favorite movies</p>", unsafe_allow_html=True)
     
     if "search_keyword" not in st.session_state:
@@ -579,7 +579,7 @@ def search_movies_section(user_email):
             placeholder="e.g., Inception, Avatar, Titanic..."
         )
     with col2:
-        search_btn = st.button("🔍 Search", key="search_button", use_container_width=True)
+        search_btn = st.button(" Search", key="search_button", use_container_width=True)
     
     if search_btn and keyword:
         st.session_state.search_keyword = keyword
@@ -590,7 +590,7 @@ def search_movies_section(user_email):
     if st.session_state.search_results:
         res = st.session_state.search_results
         if res["success"] and res["data"]:
-            st.success(f"✅ Found {len(res['data'])} movies")
+            st.success(f" Found {len(res['data'])} movies")
             for movie in res["data"]:
                 movie_card(movie, user_email, "search")
         else:
@@ -599,16 +599,16 @@ def search_movies_section(user_email):
 
 def watchlist_section(user_email):
     """Interactive Watchlist."""
-    st.markdown("<h2>📺 My Watchlist</h2>", unsafe_allow_html=True)
+    st.markdown("<h2> My Watchlist</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Manage your saved movies</p>", unsafe_allow_html=True)
 
     menu = st.radio(
         "Choose Action:",
-        ["📋 View Watchlist", "➕ Add Movie", "🗑️ Remove Movie"],
+        [" View Watchlist", " Add Movie", "Remove Movie"],
         horizontal=True,
     )
 
-    if menu == "📋 View Watchlist":
+    if menu == " View Watchlist":
         res = WatchlistService.get_user_watchlist(user_email)
         if res["success"] and res["data"]:
             st.success(f"You have {len(res['data'])} movies in your watchlist")
@@ -624,13 +624,13 @@ def watchlist_section(user_email):
                 
                 with col2:
                     st.markdown(f"### {movie['title']}")
-                    st.markdown(f"🎭 {movie.get('genres', 'N/A')}")
+                    st.markdown(f" {movie.get('genres', 'N/A')}")
                     
                     status = movie['status']
                     if status == 'watched':
-                        st.markdown("<span class='badge badge-watched'>✅ WATCHED</span>", unsafe_allow_html=True)
+                        st.markdown("<span class='badge badge-watched'> WATCHED</span>", unsafe_allow_html=True)
                     else:
-                        st.markdown("<span class='badge badge-unwatched'>🕐 TO WATCH</span>", unsafe_allow_html=True)
+                        st.markdown("<span class='badge badge-unwatched'> TO WATCH</span>", unsafe_allow_html=True)
                     
                     st.markdown(f"<p style='color: #B3B3B3;'>Added: {movie.get('added_at', 'N/A')}</p>", unsafe_allow_html=True)
                     
@@ -643,47 +643,47 @@ def watchlist_section(user_email):
                             index=0 if movie["status"] == "watched" else 1,
                             key=f"status_{movie['movieId']}",
                         )
-                        if st.button(f"💾 Update", key=f"update_{movie['movieId']}"):
+                        if st.button(f" Update", key=f"update_{movie['movieId']}"):
                             res_update = WatchlistService.update_watch_status(user_email, movie["movieId"], new_status)
                             if res_update["success"]:
-                                st.success("✅ Status updated!")
+                                st.success(" Status updated!")
                                 st.rerun()
                     
                     with col2b:
-                        if st.button(f"🗑️ Remove", key=f"remove_{movie['movieId']}"):
+                        if st.button(f" Remove", key=f"remove_{movie['movieId']}"):
                             res_remove = WatchlistService.remove_from_watchlist(user_email, movie["movieId"])
                             if res_remove["success"]:
-                                st.success("🗑️ Movie removed!")
+                                st.success(" Movie removed!")
                                 st.rerun()
                 
                 st.markdown("</div>", unsafe_allow_html=True)
                 st.markdown("---")
         else:
-            st.info("📭 Your watchlist is empty. Start adding movies!")
+            st.info(" Your watchlist is empty. Start adding movies!")
 
-    elif menu == "➕ Add Movie":
+    elif menu == " Add Movie":
         movie_id = st.number_input("Enter Movie ID", min_value=1, step=1)
         status = st.selectbox("Status", ["not_watched", "watched"])
-        if st.button("➕ Add to Watchlist", use_container_width=True):
+        if st.button(" Add to Watchlist", use_container_width=True):
             res = WatchlistService.add_to_watchlist(user_email, movie_id, status)
             if res["success"]:
-                st.success("✅ Added to your watchlist!")
+                st.success(" Added to your watchlist!")
             else:
                 st.error(res["error"])
 
-    elif menu == "🗑️ Remove Movie":
+    elif menu == " Remove Movie":
         movie_id = st.number_input("Enter Movie ID to Remove", min_value=1, step=1)
-        if st.button("🗑️ Remove from Watchlist", use_container_width=True):
+        if st.button(" Remove from Watchlist", use_container_width=True):
             res = WatchlistService.remove_from_watchlist(user_email, movie_id)
             if res["success"]:
-                st.success("🗑️ Removed successfully!")
+                st.success(" Removed successfully!")
             else:
                 st.error(res["error"])
 
 
 def insights_section(user_email):
     """User insights and statistics."""
-    st.markdown("<h2>📊 Your Insights</h2>", unsafe_allow_html=True)
+    st.markdown("<h2> Your Insights</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Your viewing statistics and preferences</p>", unsafe_allow_html=True)
     
     res = RatingService.get_user_ratings(user_email)
@@ -705,12 +705,12 @@ def insights_section(user_email):
         st.markdown("### Rating Distribution")
         st.bar_chart(ratings)
     else:
-        st.info("💡 No rating data yet. Start rating movies to see your insights!")
+        st.info(" No rating data yet. Start rating movies to see your insights!")
 
 
 def profile_section(user_email):
     """User profile management."""
-    st.markdown("<h2>🧑 Edit Profile</h2>", unsafe_allow_html=True)
+    st.markdown("<h2> Edit Profile</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Update your account information</p>", unsafe_allow_html=True)
     
     with st.form("profile_form"):
@@ -718,11 +718,11 @@ def profile_section(user_email):
         new_password = st.text_input("New Password", type="password", placeholder="Enter new password")
         confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm new password")
         
-        submit = st.form_submit_button("💾 Save Changes", use_container_width=True)
+        submit = st.form_submit_button(" Save Changes", use_container_width=True)
         
         if submit:
             if new_password and new_password != confirm_password:
-                st.error("❌ Passwords do not match!")
+                st.error(" Passwords do not match!")
             else:
                 res = UserService.update_user(
                     email=user_email, 
@@ -730,9 +730,9 @@ def profile_section(user_email):
                     new_password=new_password if new_password else None
                 )
                 if res["success"]:
-                    st.success("✅ Profile updated successfully!")
+                    st.success(" Profile updated successfully!")
                 else:
-                    st.error(f"❌ {res['error']}")
+                    st.error(f" {res['error']}")
 
 
 #main dashboard function
@@ -741,46 +741,46 @@ def user_dashboard():
     user_email = validate_session()
     
     # Sidebar navigation with enhanced styling
-    st.sidebar.markdown("<h2 style='color: #E50914; text-align: center;'>🎬 NETFLIX</h2>", unsafe_allow_html=True)
+    st.sidebar.markdown("<h2 style='color: #E50914; text-align: center;'> Pixel</h2>", unsafe_allow_html=True)
     st.sidebar.markdown("<p style='text-align: center; color: #B3B3B3; font-size: 0.9rem;'>Movie Recommendation System</p>", unsafe_allow_html=True)
     st.sidebar.markdown("---")
     
     menu = st.sidebar.radio(
         "Navigate",
         [
-            "🏠 Home", 
-            "🎯 For You", 
-            "🎞️ Because You Watched", 
-            "🎭 Browse Genres",
-            "🔍 Search", 
-            "📺 Watchlist", 
-            "📊 Insights", 
-            "🧑 Profile"
+            " Home", 
+            " For You", 
+            " Because You Watched", 
+            " Browse Genres",
+            " Search", 
+            " Watchlist", 
+            " Insights", 
+            " Profile"
         ],
     )
 
-    if menu == "🏠 Home":
+    if menu == " Home":
         header_and_stats(user_email)
         st.markdown("---")
         trending_section(user_email)
         
-    elif menu == "🎯 For You":
+    elif menu == " For You":
         personalized_recs_section(user_email)
         
-    elif menu == "🎞️ Because You Watched":
+    elif menu == " Because You Watched":
         because_you_watched(user_email)
         
-    elif menu == "🎭 Browse Genres":
+    elif menu == " Browse Genres":
         genre_explorer(user_email)
         
-    elif menu == "🔍 Search":
+    elif menu == " Search":
         search_movies_section(user_email)
         
-    elif menu == "📺 Watchlist":
+    elif menu == " Watchlist":
         watchlist_section(user_email)
         
-    elif menu == "📊 Insights":
+    elif menu == " Insights":
         insights_section(user_email)
             
-    elif menu == "🧑 Profile":
+    elif menu == " Profile":
         profile_section(user_email)
