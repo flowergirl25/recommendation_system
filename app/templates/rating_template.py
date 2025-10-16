@@ -22,7 +22,7 @@ def add_or_update_rating_view():
                 else:
                     st.error(res["error"])
     else:
-        st.info("ℹ You can only rate movies after watching them.")
+        st.info("You can only rate movies after watching them.")
 
 
 #delete rating view
@@ -44,7 +44,7 @@ def delete_rating_view():
 
 #user ratings view
 def user_ratings_view():
-    st.subheader("🎥 My Ratings")
+    st.subheader(" My Ratings")
     user_email = st.session_state.get("user_email")
     if not user_email:
         st.error(" You must be logged in.")
