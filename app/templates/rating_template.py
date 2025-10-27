@@ -1,10 +1,9 @@
 import streamlit as st
-from app.view.rating_view import RatingService   # fixed import (services, not service)
+from app.view.rating_view import RatingService  # fixed import (services, not service)
 
-
-#add or update rating view
+# Add or update rating view
 def add_or_update_rating_view():
-    st.subheader(" Rate a Movie")
+    st.subheader("Rate a Movie")
 
     movieId = st.number_input("Enter Movie ID", min_value=1, step=1)
     watched = st.radio("Have you watched this movie?", ["Yes", "No"], index=1)
@@ -14,7 +13,7 @@ def add_or_update_rating_view():
         if st.button("Submit Rating"):
             user_email = st.session_state.get("user_email")
             if not user_email:
-                st.error(" You must be logged in to rate movies.")
+                st.error("You must be logged in to rate movies.")
             else:
                 res = RatingService.add_or_update_rating(user_email, movieId, rating)
                 if res["success"]:
@@ -24,16 +23,16 @@ def add_or_update_rating_view():
     else:
         st.info("You can only rate movies after watching them.")
 
-
-#delete rating view
+# Delete rating view
 def delete_rating_view():
-    st.subheader(" Delete Your Rating")
+    st.subheader("Delete Your Rating")
+
     movieId = st.number_input("Enter Movie ID to delete rating", min_value=1, step=1)
 
     if st.button("Delete Rating"):
         user_email = st.session_state.get("user_email")
         if not user_email:
-            st.error(" You must be logged in.")
+            st.error("You must be logged in.")
         else:
             res = RatingService.delete_rating(user_email, movieId)
             if res["success"]:
@@ -41,26 +40,24 @@ def delete_rating_view():
             else:
                 st.error(res["error"])
 
-
-#user ratings view
+# User ratings view
 def user_ratings_view():
-    st.subheader(" My Ratings")
+    st.subheader("My Ratings")
     user_email = st.session_state.get("user_email")
     if not user_email:
-        st.error(" You must be logged in.")
+        st.error("You must be logged in.")
         return
 
     res = RatingService.get_user_ratings(user_email)
     if res["success"] and res["data"]:
         for r in res["data"]:
-            st.write(f" Movie ID: {r['movieId']} | ⭐ {r['rating']} | ⏰ {r['timestamp']}")
+            st.write(f"Movie ID: {r['movieId']} | Rating: {r['rating']} | Timestamp: {r['timestamp']}")
     else:
         st.info("You have not rated any movies yet.")
 
-
-#admin ratings view
+# Admin ratings view
 def admin_ratings_view():
-    st.subheader(" Admin: Manage Ratings")
+    st.subheader("Admin: Manage Ratings")
 
     action = st.selectbox("Choose action", ["View All Ratings", "Delete Rating by ID"])
 
@@ -68,7 +65,7 @@ def admin_ratings_view():
         res = RatingService.get_all_ratings()
         if res["success"] and res["data"]:
             for r in res["data"]:
-                st.write(f"ID: {r['rating_id']} | User: {r['user_email']} | Movie: {r['movieId']} | ⭐ {r['rating']}")
+                st.write(f"ID: {r['rating_id']} | User: {r['user_email']} | Movie: {r['movieId']} | Rating: {r['rating']}")
         else:
             st.warning("No ratings found.")
 
