@@ -435,7 +435,7 @@ def movie_card(movie, user_email, section_prefix=""):
 #dashboard main view
 def header_and_stats(user_email):
     """Welcome header with stats."""
-    st.markdown("<h1 style='text-align: center; margin-bottom: 2rem;'> Your Netflix Experience</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; margin-bottom: 2rem;'> Your Pixel Experience</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center; font-size: 1.2rem; color: #B3B3B3;'>Welcome back, <span style='color: #E50914; font-weight: 700;'>{user_email.split('@')[0]}</span></p>", unsafe_allow_html=True)
 
     ratings = RatingService.get_user_ratings(user_email)

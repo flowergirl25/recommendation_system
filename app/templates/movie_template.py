@@ -4,33 +4,31 @@ from app.view.recommendation_view import RecommendationService
 from app.view.rating_view import RatingService
 from app.view.watchlist_view import WatchlistService
 
+# Star rating component
 def star_rating_component(label, current_value=0, max_stars=5, key_prefix="rating"):
-    """Simple emoji-based star rating system."""
     st.markdown(f"**{label}**")
     cols = st.columns(max_stars)
-    selected = current_value
+    selected = st.session_state.get(key_prefix, current_value)
 
     for i in range(max_stars):
-        if cols[i].button("⭐" if i < selected else "☆", key=f"{key_prefix}_{i}"):
+        if cols[i].button("★" if i < selected else "☆", key=f"{key_prefix}_{i}"):
             selected = i + 1
             st.session_state[key_prefix] = selected
 
     return st.session_state.get(key_prefix, current_value)
 
-
+# Watchlist button
 def add_to_watchlist_button(user_email, movie):
-    """Reusable watchlist button component."""
-    if st.button(f" Add '{movie['title']}' to Watchlist", key=f"add_{movie['movieId']}_{user_email}"):
+    if st.button(f"Add '{movie['title']}' to Watchlist", key=f"add_{movie['movieId']}_{user_email}"):
         res = WatchlistService.add_to_watchlist(user_email, movie["movieId"], status="not_watched")
         if res["success"]:
-            st.success(" Added to Watchlist!")
+            st.success("Added to Watchlist!")
         else:
             st.error(res["error"])
 
-#User views
+# Search movies view
 def search_movies_view():
-    """Search movies by title (with posters, rating, and watchlist)."""
-    st.subheader(" Search Movies")
+    st.subheader("Search Movies")
     keyword = st.text_input("Enter movie title")
 
     if st.button("Search"):
@@ -39,41 +37,34 @@ def search_movies_view():
             user_email = st.session_state.get("user_email")
             for movie in res["data"]:
                 st.image(movie.get("poster_path"), width=120)
-                st.write(f" {movie['title']}")
-                st.write(f"⭐ Avg Rating: {movie.get('avg_rating', 0)}")
-                st.write(f" {movie.get('release_date', 'N/A')}")
-
+                st.write(movie['title'])
+                st.write(f"Avg Rating: {movie.get('avg_rating', 0)}")
+                st.write(f"Release Date: {movie.get('release_date', 'N/A')}")
                 if user_email:
                     user_ratings = RatingService.get_user_ratings(user_email)
                     existing = next((r["rating"] for r in user_ratings.get("data", [])
-                                     if r["movieId"] == movie["movieId"]), 0)
-
+                                    if r["movieId"] == movie["movieId"]), 0)
                     new_rating = star_rating_component(
                         f"Rate '{movie['title']}'",
                         int(existing),
-                        key_prefix=f"search_{movie['movieId']}_{user_email}"
+                        key_prefix=f"search_{movie['movieId']}_{user_email}",
                     )
-
                     if new_rating and new_rating != int(existing):
                         res_rate = RatingService.add_or_update_rating(user_email, movie["movieId"], new_rating)
                         if res_rate["success"]:
-                            st.success(" Rating saved!")
+                            st.success("Rating saved!")
                         else:
                             st.error(res_rate["error"])
-
-                    # ➕ Add to Watchlist
                     add_to_watchlist_button(user_email, movie)
                 else:
-                    st.info(" Login to rate or add to watchlist.")
-
+                    st.info("Login to rate or add to watchlist.")
                 st.markdown("---")
         else:
             st.warning(res.get("error", "No movies found."))
 
-
+# Movie details view
 def movie_details_view():
-    """Fetch and display detailed information of a single movie by ID."""
-    st.subheader(" Movie Details")
+    st.subheader("Movie Details")
     movieId = st.number_input("Enter movie ID", min_value=1, step=1)
 
     if st.button("Get Details"):
@@ -81,42 +72,34 @@ def movie_details_view():
         if res["success"]:
             movie = res["data"]
             user_email = st.session_state.get("user_email")
-
             st.image(movie.get("poster_path"), width=150)
-            st.write(f" **Title:** {movie['title']}")
-            st.write(f"⭐ **Average Rating:** {movie.get('avg_rating', 0)}")
-            st.write(f" **Release Date:** {movie.get('release_date', 'N/A')}")
-            st.write(f" **Overview:** {movie.get('overview', 'No overview available.')}")
-
+            st.write(f"**Title:** {movie['title']}")
+            st.write(f"**Average Rating:** {movie.get('avg_rating', 0)}")
+            st.write(f"**Release Date:** {movie.get('release_date', 'N/A')}")
+            st.write(f"**Overview:** {movie.get('overview', 'No overview available.')}")
             st.markdown("---")
-            st.subheader(" Rate This Movie")
-
+            st.subheader("Rate This Movie")
             if user_email:
                 user_ratings = RatingService.get_user_ratings(user_email)
                 existing = next((r["rating"] for r in user_ratings.get("data", [])
                                  if r["movieId"] == movie["movieId"]), 0)
-
                 new_rating = star_rating_component(
                     "Your Rating:",
                     int(existing),
-                    key_prefix=f"details_{movie['movieId']}_{user_email}"
+                    key_prefix=f"details_{movie['movieId']}_{user_email}",
                 )
-
                 if new_rating and new_rating != int(existing):
                     res_rate = RatingService.add_or_update_rating(user_email, movie["movieId"], new_rating)
                     if res_rate["success"]:
-                        st.success(" Rating updated!")
+                        st.success("Rating updated!")
                     else:
                         st.error(res_rate["error"])
-
-                #  Add to Watchlist
                 add_to_watchlist_button(user_email, movie)
             else:
-                st.info(" Please login to rate or add to watchlist.")
+                st.info("Please login to rate or add to watchlist.")
 
-            #  Similar Movies
             st.markdown("---")
-            st.subheader(" Similar Movies")
+            st.subheader("Similar Movies")
             sim = RecommendationService.get_similar_movies(movie["movieId"], k=6)
             if sim["success"] and sim["data"]:
                 cols = st.columns(3)
@@ -130,13 +113,12 @@ def movie_details_view():
             st.error(res.get("error", "Movie not found."))
 
     st.markdown("---")
-    if st.button(" Go to Recommendation Page"):
+    if st.button("Go to Recommendation Page"):
         st.switch_page("app/templates/recommendation_template.py")
 
-
+# List movies view
 def list_movies_view():
-    """Paginated list of all active movies."""
-    st.subheader(" All Movies")
+    st.subheader("All Movies")
     limit = st.slider("Movies per page", min_value=5, max_value=50, value=10)
     offset = st.number_input("Offset", min_value=0, step=limit)
 
@@ -146,18 +128,16 @@ def list_movies_view():
             user_email = st.session_state.get("user_email")
             for movie in res["data"]:
                 st.image(movie.get("poster_path"), width=120)
-                st.write(f" {movie['title']} ⭐ {movie.get('avg_rating', 0)}")
-
+                st.write(f"{movie['title']}  Avg Rating: {movie.get('avg_rating', 0)}")
                 if user_email:
                     add_to_watchlist_button(user_email, movie)
                 st.markdown("---")
         else:
             st.warning(res.get("error", "No movies found."))
 
-
+# Browse by genre view
 def browse_movies_by_genre_view():
-    """Browse movies by genre (with rating & watchlist)."""
-    st.subheader(" Browse Movies by Genre")
+    st.subheader("Browse Movies by Genre")
     genres = ["Action", "Comedy", "Drama", "Romance", "Thriller", "Sci-Fi", "Animation", "Horror", "Fantasy"]
     selected = st.selectbox("Choose a Genre", genres)
 
@@ -167,7 +147,7 @@ def browse_movies_by_genre_view():
             user_email = st.session_state.get("user_email")
             for movie in res["data"]:
                 st.image(movie.get("poster_path"), width=120)
-                st.write(f" {movie['title']} ⭐ {movie.get('avg_rating', 0)}")
+                st.write(f"{movie['title']}  Avg Rating: {movie.get('avg_rating', 0)}")
                 st.write(f"Genres: {movie.get('genres', 'N/A')}")
                 if user_email:
                     add_to_watchlist_button(user_email, movie)
@@ -175,55 +155,71 @@ def browse_movies_by_genre_view():
         else:
             st.warning(f"No movies found for genre: {selected}")
 
-
-#Admin views
+# Admin movie management view
 def admin_movie_view():
-    """Admin: Manage Movies CRUD operations."""
-    st.subheader(" Admin: Manage Movies")
+    st.subheader("Admin: Manage Movies")
     action = st.selectbox("Choose action", ["Add", "Update", "Deactivate", "Activate", "Delete"])
 
     if action == "Add":
-        title = st.text_input("Title")
-        genres = st.text_input("Genres")
-        overview = st.text_area("Overview")
-        release_date = st.date_input("Release Date")
-        runtime = st.number_input("Runtime (mins)", min_value=0)
-        popularity = st.number_input("Popularity", min_value=0.0)
-        vote_average = st.number_input("Vote Average", min_value=0.0, max_value=10.0)
-        vote_count = st.number_input("Vote Count", min_value=0)
-        language = st.text_input("Language", value="en")
-        poster_path = st.text_input("Poster URL")
-
-        if st.button("Add Movie"):
-            res = MovieService.add_movie(
-                title=title, genres=genres, overview=overview, release_date=release_date,
-                runtime=runtime, popularity=popularity, vote_average=vote_average,
-                vote_count=vote_count, language=language, poster_path=poster_path
-            )
-            st.success(res["message"] if res["success"] else res["error"])
+        with st.form("add_movie_form"):
+            title = st.text_input("Title")
+            genres = st.text_input("Genres")
+            overview = st.text_area("Overview")
+            release_date = st.date_input("Release Date")
+            runtime = st.number_input("Runtime (mins)", min_value=0)
+            popularity = st.number_input("Popularity", min_value=0.0)
+            vote_average = st.number_input("Vote Average", min_value=0.0, max_value=10.0)
+            vote_count = st.number_input("Vote Count", min_value=0)
+            language = st.text_input("Language", value="en")
+            poster_path = st.text_input("Poster URL")
+            submit = st.form_submit_button("Add Movie")
+            if submit:
+                res = MovieService.add_movie(
+                    title=title, genres=genres, overview=overview, release_date=release_date,
+                    runtime=runtime, popularity=popularity, vote_average=vote_average,
+                    vote_count=vote_count, language=language, poster_path=poster_path
+                )
+                if res["success"]:
+                    st.success(res["message"])
+                else:
+                    st.error(res["error"])
 
     elif action == "Update":
-        movieId = st.number_input("Movie ID", min_value=1, step=1)
-        field = st.text_input("Field to update (e.g. title, overview)")
-        value = st.text_input("New value")
-        if st.button("Update Movie"):
-            res = MovieService.update_movie(movieId, **{field: value})
-            st.success(res["message"] if res["success"] else res["error"])
+        with st.form("update_movie_form"):
+            movieId = st.number_input("Movie ID", min_value=1, step=1)
+            field = st.text_input("Field to update (e.g. title, overview)")
+            value = st.text_input("New value")
+            submit = st.form_submit_button("Update Movie")
+            if submit:
+                res = MovieService.update_movie(movieId, **{field: value})
+                if res["success"]:
+                    st.success(res["message"])
+                else:
+                    st.error(res["error"])
 
     elif action == "Deactivate":
         movieId = st.number_input("Movie ID", min_value=1, step=1)
         if st.button("Deactivate Movie"):
             res = MovieService.deactivate_movie(movieId)
-            st.success(res["message"] if res["success"] else res["error"])
+            if res["success"]:
+                st.success(res["message"])
+            else:
+                st.error(res["error"])
 
     elif action == "Activate":
         movieId = st.number_input("Movie ID", min_value=1, step=1)
         if st.button("Activate Movie"):
             res = MovieService.activate_movie(movieId)
-            st.success(res["message"] if res["success"] else res["error"])
+            if res["success"]:
+                st.success(res["message"])
+            else:
+                st.error(res["error"])
 
     elif action == "Delete":
         movieId = st.number_input("Movie ID", min_value=1, step=1)
         if st.button("Delete Movie"):
             res = MovieService.delete_movie(movieId)
-            st.success(res["message"] if res["success"] else res["error"])
+            if res["success"]:
+                st.success(res["message"])
+            else:
+                st.error(res["error"])

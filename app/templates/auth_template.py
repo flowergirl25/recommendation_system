@@ -1,10 +1,8 @@
 import streamlit as st
-from app.view.auth_view import AuthService  
+from app.view.auth_view import AuthService   
 
-
-#register view
+# Register View
 def register_view():
-    """User Registration UI"""
     st.subheader("Register New Account")
 
     with st.form("register_form"):
@@ -24,12 +22,10 @@ def register_view():
             if res["success"]:
                 st.success("Registration successful! Please login now.")
             else:
-                st.error(f"{res['error']}")
+                st.error(res.get("error", "Registration failed."))
 
-
-#login view
+# Login View
 def login_view():
-    """User Login UI"""
     st.subheader("Login")
 
     with st.form("login_form"):
@@ -43,27 +39,18 @@ def login_view():
         else:
             res = AuthService.login(email, password)
             if res["success"]:
-                # Save session info
                 st.session_state["user_email"] = email
                 st.session_state["user_role"] = res["user"]["role"]
-
                 st.success("Login successful! Redirecting...")
-
-                # Reload app – controller will automatically route
                 try:
-                    st.rerun()  #
+                    st.rerun()  
                 except AttributeError:
-                    st.experimental_rerun() 
-
-
+                    st.experimental_rerun()
             else:
-                st.error(f" {res['error']}")
+                st.error(res.get("error", "Login failed."))
 
-
-
-#logout view
+# Logout View
 def logout_view():
-    """Clear user session and logout"""
     if "user_email" in st.session_state:
         email = st.session_state["user_email"]
         AuthService.logout(email)
@@ -73,33 +60,28 @@ def logout_view():
     else:
         st.info("You are not logged in.")
 
-
-#current user details
+# Show Current User Details
 def show_current_user():
-    """Show currently logged-in user details."""
     if "user_email" in st.session_state:
         email = st.session_state["user_email"]
         user = AuthService.current_user(email)
         if user:
-            st.write(f" **Email:** {user['email']}")
-            st.write(f" **Name:** {user['name']}")
-            st.write(f" **Role:** {user['role']}")
+            st.write(f"**Email:** {user['email']}")
+            st.write(f"**Name:** {user['name']}")
+            st.write(f"**Role:** {user['role']}")
         else:
             st.warning("Session expired, please login again.")
             st.session_state.clear()
     else:
         st.info("No active session found.")
 
-
-#home view
+# Home View (Login / Register Selection)
 def auth_home():
-    """Home page with Login / Register selection."""
-    st.title(" Movie Recommendation System")
+    st.title("Movie Recommendation System")
     st.markdown("Welcome! Please login or register to continue.")
     st.markdown("---")
 
-    # Tabs for Login and Register
-    tabs = st.tabs([" Login", " Register"])
+    tabs = st.tabs(["Login", "Register"])
 
     with tabs[0]:
         login_view()
