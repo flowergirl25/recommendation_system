@@ -1,11 +1,11 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 from datetime import datetime
-from app.view.auth_view import AuthService
-from app.view.user_view import UserService
-from app.view.movie_view import MovieService
-from app.view.recommendation_view import RecommendationService
-from app.view.watchlist_view import WatchlistService
+from app.view.auth import AuthService
+from app.view.user import UserService
+from app.view.movie import MovieService
+from app.view.recommendation import RecommendationService
+from app.view.watchlist import WatchlistService
 from app.models.users_data import User
 from app.models.ratings_data import Rating
 
