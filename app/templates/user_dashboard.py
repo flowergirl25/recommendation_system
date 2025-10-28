@@ -1,11 +1,11 @@
 import streamlit as st
 from datetime import datetime
 
-from app.view.movie_view import MovieService
-from app.view.watchlist_view import WatchlistService
-from app.view.rating_view import RatingService
-from app.view.recommendation_view import RecommendationService
-from app.view.user_view import UserService
+from app.view.movie import MovieService
+from app.view.watchlist import WatchlistService
+from app.view.rating import RatingService
+from app.view.recommendation import RecommendationService
+from app.view.user import UserService
 
 # Custom CSS theme (no branding or emojis)
 st.markdown("""

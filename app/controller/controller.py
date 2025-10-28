@@ -1,8 +1,8 @@
 import streamlit as st
-from app.templates.auth_template import auth_home
+from app.templates.auth import auth_home
 from app.templates.user_dashboard import user_dashboard
 from app.templates.admin_dashboard import admin_dashboard
-from app.view.auth_view import AuthService
+from app.view.auth import AuthService
 
 def _ensure_role_in_session():
     """
