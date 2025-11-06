@@ -6,6 +6,8 @@ from app.view.watchlist import WatchlistService
 from app.view.rating import RatingService
 from app.view.recommendation import RecommendationService
 from app.view.user import UserService
+from app.models.users_data import User
+import pandas as pd
 
 # Custom CSS theme (no branding or emojis)
 st.markdown("""
@@ -311,45 +313,83 @@ def watchlist_section(user_email):
                 st.success("Removed successfully!")
             else:
                 st.error(res["error"])
+class UserService:
+    @staticmethod
+    def get_user_details(email):
+        user = User.fetch_by_email(email)
+        if user:
+            return {
+                "name": user.get("name"),  # user is a dict from your User fetch method
+                "email": user.get("email"),
+                # add other keys if needed
+            }
+        return {}
 
-def insights_section(user_email):
+def get_titles_for_ratings(ratings):
+    titles = []
+    for r in ratings:
+        # You probably have r["movieId"]
+        movie = MovieService.get_movie_details(r["movieId"])
+        if movie["success"] and "title" in movie["data"]:
+            titles.append(movie["data"]["title"])
+        else:
+            titles.append(str(r["movieId"]))
+    return titles
+
+def profile_section(user_email, user_details):
+    # User details above the edit area
+    st.markdown("<h2>User Profile Details</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p><strong>Name:</strong> {user_details.get('name', 'N/A')}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p><strong>Email:</strong> {user_email}</p>", unsafe_allow_html=True)
+
+    # Edit Profile button 
+    if "show_form" not in st.session_state:
+        st.session_state.show_form = False
+
+    if not st.session_state.show_form:
+        if st.button("Edit Profile"):
+            st.session_state.show_form = True
+    else:
+        st.markdown("<h2>Edit Profile</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Update your account information</p>", unsafe_allow_html=True)
+        with st.form("profile_form"):
+            new_name = st.text_input("New Name", value=user_details.get('name', ''), placeholder="Enter your full name")
+            new_password = st.text_input("New Password", type="password", placeholder="Enter new password")
+            confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm new password")
+            submit = st.form_submit_button("Save Changes", use_container_width=True)
+            if submit:
+                if new_password and new_password != confirm_password:
+                    st.error("Passwords do not match!")
+                else:
+                    res = UserService.update_user(
+                        email=user_email,
+                        new_name=new_name if new_name else None,
+                        new_password=new_password if new_password else None
+                    )
+                    if res["success"]:
+                        st.success("Profile updated successfully!")
+                        st.session_state.show_form = False
+                    else:
+                        st.error(f"{res['error']}")
     st.markdown("<h2>Your Insights</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Your viewing statistics and preferences</p>", unsafe_allow_html=True)
     res = RatingService.get_user_ratings(user_email)
-    if res["success"] and res["data"]:
-        ratings = [r["rating"] for r in res["data"]]
-        col1, col2, col3, col4 = st.columns(4)
-        with col1: st.metric("Total Ratings", len(ratings))
-        with col2: st.metric("Average Rating", f"{sum(ratings)/len(ratings):.2f}/5")
-        with col3: st.metric("Highest Rating", f"{max(ratings)}/5")
-        with col4: st.metric("Lowest Rating", f"{min(ratings)}/5")
-        st.markdown("---")
-        st.markdown("### Rating Distribution")
-        st.bar_chart(ratings)
-    else:
-        st.info("No rating data yet. Start rating movies to see your insights!")
+    ratings = res["data"]
+    values = [r["rating"] for r in ratings]
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Ratings", len(values))
+    with col2:
+        avg_rating = sum(values)/len(values) if values else 0
+        st.metric("Average Rating", f"{avg_rating:.2f}/5")
+    with col3:
+        st.metric("Highest Rating", f"{max(values)}/5" if values else "0/5")
+    with col4:
+        st.metric("Lowest Rating", f"{min(values)}/5" if values else "0/5")
 
-def profile_section(user_email):
-    st.markdown("<h2>Edit Profile</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #B3B3B3; margin-bottom: 20px;'>Update your account information</p>", unsafe_allow_html=True)
-    with st.form("profile_form"):
-        new_name = st.text_input("New Name", placeholder="Enter your full name")
-        new_password = st.text_input("New Password", type="password", placeholder="Enter new password")
-        confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm new password")
-        submit = st.form_submit_button("Save Changes", use_container_width=True)
-        if submit:
-            if new_password and new_password != confirm_password:
-                st.error("Passwords do not match!")
-            else:
-                res = UserService.update_user(
-                    email=user_email,
-                    new_name=new_name if new_name else None,
-                    new_password=new_password if new_password else None
-                )
-                if res["success"]:
-                    st.success("Profile updated successfully!")
-                else:
-                    st.error(f"{res['error']}")
+    titles = get_titles_for_ratings(ratings)
+    chart_data = pd.DataFrame({"Movie": titles, "Rating": values}).set_index("Movie")
+    st.bar_chart(chart_data)
 
 def user_dashboard():
     user_email = validate_session()
@@ -365,10 +405,11 @@ def user_dashboard():
             "Browse Genres",
             "Search",
             "Watchlist",
-            "Insights",
             "Profile"
         ],
     )
+    user_email = validate_session()
+    user_details = UserService.get_user_details(user_email)
     if menu == "Home":
         header_and_stats(user_email)
         st.markdown("---")
@@ -383,7 +424,5 @@ def user_dashboard():
         search_movies_section(user_email)
     elif menu == "Watchlist":
         watchlist_section(user_email)
-    elif menu == "Insights":
-        insights_section(user_email)
     elif menu == "Profile":
-        profile_section(user_email)
+        profile_section(user_email, user_details) 
