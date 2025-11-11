@@ -6,24 +6,26 @@ def register_view():
     st.subheader("Register New Account")
 
     with st.form("register_form"):
-        name = st.text_input("Full Name")
+        first_name = st.text_input("First Name")
+        last_name=st.text_input("Last Name")
+        name=first_name+last_name
         email = st.text_input("Email")
         password = st.text_input("Password", type="password")
         confirm_password = st.text_input("Confirm Password", type="password")
         submit = st.form_submit_button("Register")
 
     if submit:
-        if not name or not email or not password:
+        if not first_name or not last_name or not email or not password:
             st.warning("All fields are required.")
         elif password != confirm_password:
             st.error("Passwords do not match.")
         else:
-            res = AuthService.register(name, email, password)
+            # pass first_name and last_name separately to the service
+            res = AuthService.register(first_name.strip(), last_name.strip(), email.strip(), password)
             if res["success"]:
                 st.success("Registration successful! Please login now.")
             else:
                 st.error(res.get("error", "Registration failed."))
-
 # Login View
 def login_view():
     st.subheader("Login")
