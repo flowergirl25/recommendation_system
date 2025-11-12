@@ -4,12 +4,14 @@ from app.utils.logging_decorator import log_call
 import pymysql.cursors
 
 class User:
-    def __init__(self, name, email, password, role="user", is_active=True):
-        self.name = name
+    def __init__(self, email: str, first_name: str, last_name: str, password: str, role: str = "user"):
         self.email = email
-        self.password = password  
+        self.first_name = first_name.strip()
+        self.last_name = last_name.strip()
+        self.name = f"{self.first_name} {self.last_name}".strip()
+        self.password = password
         self.role = role
-        self.is_active = is_active
+        self.is_active = True
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 
@@ -22,6 +24,8 @@ class User:
         sql = """
         CREATE TABLE IF NOT EXISTS users (
             email VARCHAR(100) PRIMARY KEY,
+            first_name VARCHAR(100),
+            last_name VARCHAR(100),
             name VARCHAR(100),
             password VARCHAR(255) NOT NULL,
             role ENUM('admin', 'user') DEFAULT 'user',
@@ -41,12 +45,19 @@ class User:
         conn = connecting_db()
         cursor = conn.cursor()
         sql = """
-        INSERT INTO users (email, name, password, role, is_active, created_at, updated_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO users (
+            email, first_name, last_name, name, 
+            password, role, is_active
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(sql, (
-            self.email, self.name, self.password, self.role, 
-            self.is_active, self.created_at, self.updated_at
+            self.email,
+            self.first_name,
+            self.last_name,
+            self.name,
+            self.password,
+            self.role,
+            self.is_active
         ))
         conn.commit()
         conn.close()
@@ -78,16 +89,19 @@ class User:
         return users
 
     @staticmethod
-    def update_profile(email, name=None, password=None):
+    def update_profile(email, first_name=None, last_name=None,password=None):
         """Update user name and/or password."""
         conn = connecting_db()
         cursor = conn.cursor()
         updates = []
         values = []
 
-        if name:
+        if first_name:
             updates.append("name=%s")
-            values.append(name)
+            values.append(first_name)
+        if last_name:
+            updates.append("name=%s")
+            values.append(last_name)
         if password:
             updates.append("password=%s")
             values.append(password)
