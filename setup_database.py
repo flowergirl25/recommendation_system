@@ -29,7 +29,7 @@ def setup_database():
     if DEV_MODE and ADMIN_EMAIL and ADMIN_PW:
         if not User.fetch_by_email(ADMIN_EMAIL):
             hashed = bcrypt.hashpw(ADMIN_PW.encode(), bcrypt.gensalt()).decode()
-            admin = User(name="Rakshita Vishwakarma", email=ADMIN_EMAIL, password=hashed, role="admin")
+            admin = User(first_name="Rakshita",last_name="Vishwakarma" ,email=ADMIN_EMAIL, password=hashed, role="admin")
             admin.save()
             print(f"Admin created: {ADMIN_EMAIL}")
         else:
