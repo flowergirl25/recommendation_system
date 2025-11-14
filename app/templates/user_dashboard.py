@@ -180,38 +180,7 @@ def personalized_recs_section(user_email):
     else:
         st.info("Rate a few movies to get personalized recommendations!")
 
-def because_you_watched(user_email):
-    st.markdown("<h2>Because You Watched...</h2>", unsafe_allow_html=True)
-    top_movies = RatingService.get_user_ratings(user_email)
-    if not top_movies["success"] or not top_movies["data"]:
-        st.info("Rate some movies to see personalized recommendations based on your favorites!")
-        return
-    
-    # Filter ratings >= 4 stars (movies user liked)
-    high_rated_movies = [movie for movie in top_movies["data"] if movie["rating"] >= 4.0]
-    
-    if not high_rated_movies:
-        st.info("Rate some movies with 4+ stars to get recommendations based on movies you loved!")
-        return
-        
-    # Sort by rating and get the highest rated movie
-    sorted_ratings = sorted(high_rated_movies, key=lambda x: x["rating"], reverse=True)
-    top_movie = sorted_ratings[0]
-    
-    movie_details = MovieService.get_movie_details(top_movie['movieId'])
-    if movie_details["success"] and movie_details["data"]:
-        movie_title = movie_details['data']['title']
-        st.markdown(f"<p style='color: #B3B3B3; margin-bottom: 20px;'>Since you loved <span style='color: #E50914; font-weight: 700;'>{movie_title}</span> (rated {top_movie['rating']}/5), you might enjoy these:</p>", unsafe_allow_html=True)
-        
-        # Pass user_email to exclude already rated movies
-        res = RecommendationService.get_similar_movies(top_movie["movieId"], k=8, user_email=user_email)
-        if res["success"] and res["data"]:
-            for movie in res["data"]:
-                movie_card(movie, user_email, "similar")
-        else:
-            st.warning("No similar movies found at the moment. Try rating more movies!")
-    else:
-        st.warning("Could not load movie details.")
+
 
 def genre_explorer(user_email):
     st.markdown("<h2>Explore by Genre</h2>", unsafe_allow_html=True)
@@ -410,7 +379,6 @@ def user_dashboard():
         [
             "Home",
             "For You",
-            "Because You Watched",
             "Browse Genres",
             "Search",
             "Watchlist",
@@ -425,8 +393,7 @@ def user_dashboard():
         trending_section(user_email)
     elif menu == "For You":
         personalized_recs_section(user_email)
-    elif menu == "Because You Watched":
-        because_you_watched(user_email)
+
     elif menu == "Browse Genres":
         genre_explorer(user_email)
     elif menu == "Search":

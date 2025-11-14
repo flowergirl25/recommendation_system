@@ -1,6 +1,7 @@
 # Editor/IDE
 .vscode/
 .idea/
+__pycache__
 
 # Log and temp files
 *.log

@@ -25,9 +25,9 @@ def register_view():
         if first_name:
             first_name_valid = validate_first_last_name(first_name)
             if not first_name_valid:
-                st.error("❌ First name must contain only letters (no spaces or special characters)")
+                st.error("First name must contain only letters (no spaces or special characters)")
             else:
-                st.success("✓ Valid first name")
+                st.success("Valid first name")
         
         # Last Name Field
         last_name = st.text_input("Last Name", value=st.session_state.reg_last_name)
@@ -35,9 +35,9 @@ def register_view():
         if last_name:
             last_name_valid = validate_first_last_name(last_name)
             if not last_name_valid:
-                st.error("❌ Last name must contain only letters (no spaces or special characters)")
+                st.error("Last name must contain only letters (no spaces or special characters)")
             else:
-                st.success("✓ Valid last name")
+                st.success("Valid last name")
         
         # Email Field
         email = st.text_input("Email", value=st.session_state.reg_email)
@@ -45,9 +45,9 @@ def register_view():
         if email:
             email_valid = validate_email(email)
             if not email_valid:
-                st.error("❌ Email must be from gmail.com, yahoo.com, or outlook.com")
+                st.error("Email must be from gmail.com, yahoo.com, or outlook.com")
             else:
-                st.success("✓ Valid email address")
+                st.success("Valid email address")
         
         # Password Field
         password = st.text_input("Password", type="password", value=st.session_state.reg_password)
@@ -55,9 +55,9 @@ def register_view():
         if password:
             password_valid = validate_password(password)
             if not password_valid:
-                st.error("❌ Password must be 8+ characters with uppercase, lowercase, digit, and special character (@$!%*?&)")
+                st.error("Password must be 8+ characters with uppercase, lowercase, digit, and special character (@$!%*?&)")
             else:
-                st.success("✓ Strong password")
+                st.success("Strong password")
         
         # Confirm Password Field
         confirm_password = st.text_input("Confirm Password", type="password", value=st.session_state.reg_confirm_password)
@@ -65,9 +65,9 @@ def register_view():
         if confirm_password:
             passwords_match = (password == confirm_password and password != "")
             if not passwords_match:
-                st.error("❌ Passwords do not match")
+                st.error("Passwords do not match")
             else:
-                st.success("✓ Passwords match")
+                st.success("Passwords match")
         
         submit = st.form_submit_button("Register")
 
@@ -95,9 +95,9 @@ def register_view():
 
         # Display validation summary
         if not all_fields_filled:
-            st.warning("⚠️ All fields are required.")
+            st.warning("All fields are required.")
         elif not all_validations_pass:
-            st.error("❌ Please fix the errors above before submitting.")
+            st.error("Please fix the errors above before submitting.")
             # Show specific issues
             if not first_name_valid:
                 st.error("• Invalid first name")
@@ -113,7 +113,7 @@ def register_view():
             # All flags are True - proceed with registration
             res = AuthService.register(first_name.strip(), last_name.strip(), email.strip(), password)
             if res["success"]:
-                st.success("✅ Registration successful! Please login now.")
+                st.success("Registration successful! Please login now.")
                 # Clear form fields on success
                 st.session_state.reg_first_name = ""
                 st.session_state.reg_last_name = ""
