@@ -10,7 +10,7 @@ def validate_name(name: str) -> bool:
 
 def validate_first_last_name(name: str) -> bool:
     """Validate first or last name: non-empty, letters only."""
-    return bool(name and re.match(r"^[A-Za-z]+$", name))
+    return bool(name and re.match(r"^[A-Za-z]{3,}$", name))
 def validate_password(password: str) -> bool:
     """Validate password strength: 8+ chars, upper, lower, digit, special."""
     if not password or len(password) < 8:

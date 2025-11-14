@@ -120,6 +120,7 @@ def register_view():
                 st.session_state.reg_email = ""
                 st.session_state.reg_password = ""
                 st.session_state.reg_confirm_password = ""
+                st.session_state["show_login_tab"] = True
             else:
                 st.error(res.get("error", "Registration failed."))
 
@@ -186,8 +187,11 @@ def auth_home():
 
     tabs = st.tabs(["Login", "Register"])
 
-    with tabs[0]:
-        login_view()
-
-    with tabs[1]:
-        register_view()
+    if st.session_state.get("show_login_tab", False):
+        tabs[0].select()  # Show Login tab
+        st.session_state["show_login_tab"] = False   # Reset flag
+    else:
+        with tabs[0]:
+            login_view()
+        with tabs[1]:
+            register_view()
