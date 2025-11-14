@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import pymysql
+import pymysql.cursors
 from app.config.db_connection import connecting_db
 from app.models.movies_data import Movie
 from app.models.ratings_data import Rating
@@ -92,14 +93,33 @@ class RecommendationService:
                 conn.close()
 
     @staticmethod
-    def get_similar_movies(movieId, k=10):
+    def get_similar_movies(movieId, k=10, user_email=None):
         """Return top K similar movies using similarity matrix."""
         try:
             similarity_matrix = RecommendationService._load_similarity_matrix()
             if movieId not in similarity_matrix.index:
                 return {"success": False, "error": "Movie not found in similarity model"}
 
-            similar_movies = similarity_matrix[movieId].sort_values(ascending=False).head(k).index.tolist()
+            # Get user's rated movies to exclude them
+            user_rated_movies = set()
+            if user_email:
+                conn = connecting_db()
+                cursor = conn.cursor(pymysql.cursors.DictCursor)
+                cursor.execute("SELECT movieId FROM ratings WHERE user_email=%s", (user_email,))
+                user_rated_movies = {row['movieId'] for row in cursor.fetchall()}
+                conn.close()
+
+            # Get similarity scores and sort
+            sim_scores = similarity_matrix[movieId].sort_values(ascending=False)
+            
+            # Filter out the same movie and user's rated movies
+            similar_movies = []
+            for movie_id, score in sim_scores.items():
+                if movie_id != movieId and movie_id not in user_rated_movies:
+                    similar_movies.append(movie_id)
+                    if len(similar_movies) >= k:
+                        break
+            
             data = RecommendationService._fetch_movie_details(similar_movies)
             return {"success": True, "data": data}
         except Exception as e:
